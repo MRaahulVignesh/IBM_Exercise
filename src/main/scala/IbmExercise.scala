@@ -3,7 +3,7 @@ package com.ibm.stocator;
 import org.apache.spark.sql.{SparkSession, DataFrame}
 import org.apache.spark.sql.functions.regexp_replace
 
-object SimpleApp {
+object IbmExercise {
 
 	// Place your COS Credentials
 	val access_key = ""
@@ -17,7 +17,7 @@ object SimpleApp {
 
 	def main(args: Array[String]) {
 		
-		var spark = SparkSession.builder.master("local").appName("Simple Application").getOrCreate()
+		var spark = SparkSession.builder.master("local").appName("IBM Exercise").getOrCreate()
 		// makes a connection to IBM COS via Stocator
 		connectionToCos(spark)
 		// reads data from Cos and stores it in dataframe
