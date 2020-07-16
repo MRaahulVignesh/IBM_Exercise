@@ -1,5 +1,3 @@
-package com.ibm.stocator
-
 import wvlet.log.LogSupport
 import org.apache.spark.sql.{SparkSession, DataFrame}
 import org.apache.spark.sql.functions.regexp_replace
