@@ -1,4 +1,4 @@
-package com.ibm.stocator;
+package com.ibm.stocator
 
 import wvlet.log.LogSupport
 import org.apache.spark.sql.{SparkSession, DataFrame}
