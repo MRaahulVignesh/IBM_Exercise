@@ -20,4 +20,9 @@ Install and configure Eclipse using the other instructions provided, and then us
 
 
 ## Avalible Scripts
-sbt operations like sbt compile & sbt run
+1. sbt compile
+
+2. sbt "run access_key secret_key endpoint url username password"
+_credentials for both IBM COS and DB2 have to be passed via terminal using the above command_
+
+other sbt operations can also be performed.
