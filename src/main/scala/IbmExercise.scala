@@ -2,29 +2,36 @@ import wvlet.log.LogSupport
 import org.apache.spark.sql.{SparkSession, DataFrame}
 import org.apache.spark.sql.functions.regexp_replace
 
-object IbmExercise extends LogSupport{
+object IbmExercise extends LogSupport {
 
-	// Place your COS Credentials
-	val access_key : String = ""
-	val secret_key : String = ""
-	val endpoint : String = ""
+	/*
+		credentials for both IBM COS and DB2 have to be passed via terminal using the below command
+		sbt "run arguments"
+		E.g: sbt "run access_key secret_key endpoint url username password"
 
-	// Place your DB2 Credentials
-	val url : String = ""
-	val username : String = ""
-	val password : String = ""
+		accessing the arguments in main function
+		credentials of COS
+		args(0) -------> access_key
+		args(1) -------> secret_key
+		args(2) -------> endpoint
+
+		credentials of DB2
+		args(3) -------> url
+		args(4) -------> username
+		args(5) -------> password
+	*/
 
 	def main(args: Array[String]) {
 		
 		var spark = SparkSession.builder.master("local").appName("IBM Exercise").getOrCreate()
 		// makes a connection to IBM COS via Stocator
-		connectionToCos(spark)
+		connectionToCos(spark, args(0), args(1), args(2))
 		// reads data from Cos and stores it in dataframe
 		var dataframe = readDataFromCos(spark)
 		// writes the dataframe into DB2 using JBLC driver
-		val written_df : DataFrame = DB2_Operations("write",spark, dataframe, "jdbc", "FFL38638.EMPLOYEE_DATA", url, username, password)
+		val written_df : DataFrame = DB2_Operations("write",spark, dataframe, "jdbc", "FFL38638.EMPLOYEE_DATA", args(3), args(4), args(5))
 		// reads the data from DB2 and loads it into dataframe
-		var read_dataframe = DB2_Operations("read",spark, null, "jdbc", "FFL38638.EMPLOYEE_DATA", url, username, password)
+		var read_dataframe = DB2_Operations("read",spark, null, "jdbc", "FFL38638.EMPLOYEE_DATA", args(3), args(4), args(5))
 		// performs the computation operation and stores the result into COS as parquet
 		calculateResult(spark, read_dataframe)
 		// reads the stored parquet files
@@ -69,7 +76,7 @@ object IbmExercise extends LogSupport{
 	}
 
 	// Function makes connection to IBM cos
-	def connectionToCos(spark: SparkSession) {
+	def connectionToCos(spark: SparkSession, access_key: String, secret_key: String, endpoint: String) {
 	
 		val prefix : String = "fs.cos.myCos"
 		// configuring the stocator using HMAC method
@@ -102,6 +109,7 @@ object IbmExercise extends LogSupport{
 			val genderRatio : DataFrame = spark.sql(query_1)
 			info("calcualteResult : " + "Query 1 Processed")
 			val filePath1 : String = "cos://candidate-exercise.myCos/emp-data.csv/result0.parquet"
+			// writing the result into IBM COS as parquet file
 			writeDataToCos(genderRatio, filePath1)
 		} catch {
 			case e  : Throwable => error("calcualteResult : " + "Error while processing Query 1", e)
@@ -118,11 +126,11 @@ object IbmExercise extends LogSupport{
 			val averageSalary : DataFrame = spark.sql(query_2)
 			info("calcualteResult : " + "Query 2 Processed")
 			val filePath2 : String = "cos://candidate-exercise.myCos/emp-data.csv/result1.parquet"
+			// writing the result into IBM COS as parquet file
 			writeDataToCos(averageSalary, filePath2)
 		} catch {
 			case e  : Throwable => error("calcualteResult : " + "Error while processing Query 2", e)
 		}
-		// writing the result into IBM COS as parquet file
 	}
 
 	// Function to perform operation on DB2
